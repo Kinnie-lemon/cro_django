@@ -1,0 +1,74 @@
+{% extends "home.html"%}
+
+{% block content %}
+ <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">CRO 学情站 用户登录</h3>
+                    </div>
+                
+                    <div class="panel-body">
+                        <div class="jumbotron">
+                            <h1>欢迎登陆 CRO 学情站!</h1>
+                            <p>内部员工可在此记录工作实况；校区客户可登录查看进步曲线，上课记录等详细内容</p>
+                            
+
+</div>
+<h1 class="text-center">登录</h1>
+<div class="form-group">
+    <label for="username" class="col-sm-2 control-label">用户名</label>
+    <input type="text" name="username" id="username" class="form-control" placeholder="">
+</div><!-- form-group -->
+<div class="form-group">
+    <label for="password" class="col-sm-2 control-label">密码</label>
+    <input type="text" name="password" id="password" class="form-control" placeholder="">
+</div><!-- form-group -->
+<div class="form-group">
+    <label for="id_code" class="control-label">验证码</label>
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" name="id_code" id="id_code" >
+        </div>
+        <div class="col-md-6">
+            <!-- img标签可以放图片的二进制数据-->
+            <img src="/get_code/" width="380" height="35" id='id_img'> 
+        </div>  
+    </div><!-- row-->
+    
+</div><!-- form-group -->
+<input type="button" value="登录" class="btn btn-primary btn-block" id='login_submit'>
+<span style="color:red" id="error"></span>
+{% endblock%}
+
+{% block js %}
+<script>
+    $("#id_img").click(function(){
+        //1.先获取标签之前的src
+        let oldVal = $(this).attr('src');
+        $(this).attr('src',oldVal += '?')
+
+    })
+    $("#login_submit").click(function(){
+        $.ajax({
+            url:'',
+            type:'POST',
+            data:{
+                'username':$('#username').val(),
+                'password':$('#password').val(),
+                'code':$('#id_code').val(),
+                'csrfmiddlewaretoken':'{{csrf_token}}'
+            },
+            success:function(args){
+                if (args.code == 1000){
+                    // 跳转到首页
+                    window.location.href = args.url
+                }
+                else{
+                    $("#error").text(args.msg)
+                }
+            }
+
+})
+
+    })
+</script>
+{% endblock%}

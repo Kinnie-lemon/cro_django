@@ -1,0 +1,157 @@
+{% extends 'home.html' %}
+
+{% block content %}
+
+<div class="luffy-container">
+    <!-- 上传文件 -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">上传文件</button>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="exampleModalLabel">上传文件</h4>
+        </div>
+        <div class="modal-body">
+        <!--  文件上传配置enctype-->
+            <form action="" method="post" enctype="multipart/form-data">
+            {%csrf_token%}
+            <div class="form-group">
+                <label for="uploader" class="control-label">上传人:</label>
+                <select class="form-control" id="uploader" name="uploader">
+                {% for obj in teacher_list %}
+                    <option value="{{obj.tch_account}}">{{obj.tch_name}}<span>&lt;{{obj.tch_account}}&gt;</span></option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cc" class="control-label">抄送人:</label>
+                <select class="form-control" id="cc" name="cc">
+                {% for obj in teacher_list %}
+                    <option value="{{obj.tch_account}}">{{obj.tch_name}}<span>&lt;{{obj.tch_account}}&gt;</span></option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+            <input  type="checkbox" id="if_verify" name="if_verify" value="1">文件需审核
+            </div>
+            <div class="form-group " >
+                <label for="verify_person" class="control-label" >审核人:</label>
+                <select class="form-control" id="verify_person" name="verify_person" >
+                    <option value="">不需审核</option>
+                {% for obj in teacher_list %}
+                    <option value="{{obj.tch_account}}">{{obj.tch_name}}<span>&lt;{{obj.tch_account}}&gt;</span></option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="notes" class="control-label">备注:</label>
+                <textarea class="form-control" id="notes" name="notes"></textarea>
+            </div>
+            <div style="position: relative;display: inline-block;height: 50px;min-width: 300px;overflow: hidden;">
+                        <div style="position: absolute;top: 0;left: 0;right: 0;bottom: 0;z-index: 1000;border: 1px dotted #9d9d9d;color: #9d9d9d;line-height: 50px;padding-left: 15px;">
+                            <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+                            <span>点击上传文件</span>
+                        </div>
+                        <input name="file_upload" type="file" id="file_upload"
+                            style="position: absolute;top: 0;left: 0;right: 0;bottom: 0;background-color: #333333;z-index: 1001;opacity: 0;filter:alpha(opacity=0);">
+                    </div>
+                    <p class="help-block">注意：批量导入的Excel需使用规定格式模板. <a href="/customer/tpl/">下载模板</a></p>
+                </div>
+                
+                {% if status %}
+                    <span style="color: green;">{{ msg }}</span>
+                {% else %}
+                    <span style="color: red;">{{ msg }}</span>
+                {% endif %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">上传</button>
+        </div>
+        </form>
+        </div>
+    </div>
+    </div>
+            
+
+         <div class="btn-group" style="margin: 5px 0">
+            </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>文件名称</th>
+                <th>上传人</th>
+                <th>抄送人</th>
+                <th>审核人</th>
+                <th>审核状态</th>
+                <th>选项</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in data_list %}
+                <tr>
+                    <td><a href='/cloud/download/{{row.pk}}/' id='{{row.pk}}'>{{ row.files }}</a></td>
+                    <td id='{{row.uploader.tch_account}}'>{{ row.uploader.tch_name }}</td>
+                    <td>{{ row.cc }}</td>
+                    <td>{{ row.verify_person.tch_name }}</td>
+                    <td>{% if row.if_verify %}
+                            {% if row.verify_mode %}
+                                已审核
+                                {% else %}
+                                待审核
+                                {% endif %}
+                        {% else %}
+                            不需审核
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a class="btn btn-default btn-sm edit" style="color: #333333;" href="/sales/customer/edit/{{ row.id }}/">编辑</a>
+                        |
+                        <a class="btn btn-danger btn-sm del" href="/sales/customer/del/{{ row.id }}/">删除</a>
+                    </td>
+
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#file_upload').change(function (e) {
+                var fileName = e.currentTarget.files[0].name;
+                $(this).prev().find('span').text(fileName);
+            })
+        })
+        $(function () {
+            if($("#if_verify").is(':checked')){
+                $('#verify_person').removeAttr('disabled')
+            }
+/*
+        })
+        $(".down_file").click(function(e){
+            var file_id = e.currentTarget.id
+            var uploader = e.currentTarget.nextElementSibling.id
+            console.log(e.currentTarget.nextElementSibling)
+            alert(e.currentTarget.id)
+            $.ajax({
+                url:'/cloud/download/'+file_id+'/',
+                type:'POST',
+                data:{
+                    "csrfmiddlewaretoken":'{{csrf_token}}',
+                    "uploader":uploader
+                },
+                success: function(args){
+                    console.log(args)
+                    alert(args.path)
+                    var path = args.path
+                    window.location.href = path //重定向到文件所在的路径
+                }
+            })
+        })
+        */
+    </script>
+{% endblock %}

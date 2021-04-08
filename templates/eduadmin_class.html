@@ -1,0 +1,355 @@
+<!-- 继承模板 -->
+{% extends 'home.html' %}
+
+
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+    <h3 class="panel-title">班级管理</h3>
+    </div>
+</div>
+<div class="row">
+   <div class="col-lg-6">
+        <div class="input-group">
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">学生姓名 <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                <li><a href="#">班级名</a></li>
+                <li><a href="#">教师</a></li>
+                <li><a href="#">教室</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+                </ul>
+            </div><!-- /btn-group -->
+            <input type="text" class="form-control" aria-label="请输入查找内容">
+            
+            <span class="input-group-btn">
+            <button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false">查找</button>
+            </span>
+             </div><!-- /.col-lg-6 -->
+             <div class="btn-group-btn ">
+            <span class="input-group-addon">
+                <input type="radio" name="header_checkbox" aria-label="done" id="done" class="header_checkbox">已结课
+            </span>
+            <span class="input-group-addon">
+                <input  type="radio" name="header_checkbox" aria-label="doing" id="doing" class="header_checkbox">未结课
+            </span>
+            
+            <span class="input-group-addon">
+                    <input type="radio" name="header_checkbox" aria-label="none" id="none" class="header_checkbox">未排课
+            </span>
+
+            <span class="input-group-addon">
+            <input type="radio" name="header_checkbox" aria-label="none" id="reset" class="header_checkbox">重置
+            </span>
+        </div><!-- /input-group -->
+</div><!-- /.row -->
+<div class="row">
+ 
+  <div class="btn-group-btn">
+            <a href="{% url 'stu_add' %}" class="btn btn-info ">添加</a>
+            <a href="" class="btn btn-warning">发送消息</a>
+            <a href="" class="btn btn-success">导出Excel</a>
+             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    更多操作 <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="#" >导入名单</a></li>
+    <li><a href="#">导出名单</a></li>
+  </ul>
+        </div><!-- /btn-group -->
+</div><!-- /.row -->
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th> 班级名称</th>
+                <th> 授课类型</th>
+                <th> 授课时段</th>
+                <th> 授课教师</th>
+                <th> 人数</th>
+                <th> 已消耗课时</th>
+                <th> 操作 </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stu in class_list %}
+                <tr>
+                   <!--
+                    <td>
+                    {% for c in stu.tches_name.all%}
+                        {% if forloop.last %}
+                            {{c.tch_name}}
+                            {% else %}
+                            {{c.tch_name}},
+                        {% endif %}
+                    {% endfor %}</td>-->
+                    
+                    <td>
+                    {{stu.class_name}}
+                    </td>
+                    <td>
+                    {{stu.class_category}}
+                    </td>
+                    <td>
+                    {{stu}}
+                    </td>
+                    <td>
+                    {% for c in stu.class_bkp_set.all %}
+                    
+                        {% if forloop.last %}
+                            {{c.tches_name.first.tch_name}}
+                        {% else %}
+                            {{c..tches_name.first.tch_name}},
+                        {% endif %}
+                    {% endfor %}</td>
+                    </td>
+                    <td>
+                    {{stu.stu_num}}
+                    </td>
+                    <td>
+                    {{stu.class_count}}
+                    </td>
+
+
+                    <td>
+                        <a href="{% url 'eduadmin' stu.pk %}" class="btn btn-default btn-sm">学员管理</a>
+                        <a class="btn btn-default btn-sm roll" data-toggle="modal" data-target="#rollModal" roll_id="{{stu.pk}}">点名</a>
+                        <a class="btn btn-warning btn-sm done" done_id="{{stu.pk}}">结业</a>
+                        <a class="btn btn-danger btn-sm del" delete_id="{{stu.pk}}">删除</a>
+                    </td>
+                </tr>
+                <nav aria-label="Page navigation"></nav>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="col-md-8 col-md-offset-3">
+    {{page_obj.page_html|safe}}
+    </div>
+
+    <!-- Button trigger modal -->
+
+
+<!--roll Modal -->
+<div class="modal fade rollModal" id="rollModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">签到册</h4>
+      </div>
+      <div class="modal-body" >
+        <table class="table table-hover table-striped table-bordered " >
+            
+            <tr id="roll-table">
+                <th>姓名</th>
+                <th>账号</th>
+                <th>签到</th>
+            </tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submit_roll">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    $('#rollModal').on('hidden.bs.modal', function (e) {
+  // do something...
+})
+    $('.del').on('click', function(){
+        //this可以直接获取当前操作的对象
+        let currentBtn = $(this);
+        //弹出二次确认的弹框
+        swal({
+        title: "确定删除？",
+        text: "删除后将不可恢复数据！",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-danger",
+        confirmButtonText: "继续",
+        cancelButtonText: "取消",
+        closeOnConfirm: false,
+        closeOnCancel: false
+        },
+        function(isConfirm) {
+        if (isConfirm) {
+            // 向后端发送ajax请求删除数据
+            $.ajax({
+                url:'/eduadmin/class/done/',
+                type: 'POST',
+                data:{'delete_id':currentBtn.attr('delete_id')},
+                success: function(args){
+                    // 判断响应状态码，做不同处理
+                    if(args.code === 1000){
+                    // 弹窗，删除成功
+                    swal("删除成功!", args.msg, "success");
+                    // 局部刷新
+                    // 利用DOM 动态刷新
+                    currentBtn.parent().parent().remove();
+
+                    }
+                
+                else{
+                    swal("失败!", "无法删除", "info")
+                }}
+            })
+        }
+        else {
+            swal("已取消", "信息已安全保留 :)", "error");
+        }
+        });
+    })
+
+    $(".done").on("click",function(){
+        //this可以直接获取当前操作的对象
+        let currentBtn = $(this);
+        //弹出二次确认的弹框
+        swal({
+        title: "确定结业？",
+        text: "结业后将不可更改状态！",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-danger",
+        confirmButtonText: "继续",
+        cancelButtonText: "取消",
+        closeOnConfirm: false,
+        closeOnCancel: false
+        },
+        function(isConfirm) {
+        if (isConfirm) {
+            // 向后端发送ajax请求删除数据
+            $.ajax({
+                url:'/eduadmin/class/done/',
+                type: 'POST',
+                data:{
+                    'done_id':currentBtn.attr('done_id'),
+                    'csrfmiddlewaretoken':"{{csrf_token}}",
+                    },
+                success: function(args){
+                    console.log(args.code)
+                    // 判断响应状态码，做不同处理
+                    if(args.code === 1000){
+                    // 弹窗，删除成功
+                    swal(args.msg,"更新成功!", "success");
+                    // 局部刷新
+                    // 利用DOM 动态刷新
+                    //currentBtn.parent().parent().remove();
+
+                    }
+                
+                else{
+                    swal("失败!", "无法更新", "info")
+                }}
+            })
+        }
+        else {
+            swal("已取消", "信息已安全保留 :)", "error");
+        }
+        });
+    })
+
+ 
+    $(".roll").on("click",function(){
+        let currentBtn = $(this)
+        let roll_id = currentBtn.attr("roll_id")
+        $.ajax({
+            url:"/eduadmin/class/roll/"+roll_id+"/",
+            type:"GET",
+            success: function(args){
+                if (args.code === 1000){
+                    console.log(args.roll_obj)
+                    if (args.roll_obj){
+                        for (var i of args.roll_obj ){
+                            // 只能用在div上
+                            //console.log($("#roll-table").children)
+                            var roll_tr = $("#roll-table").after("<tr></tr>").next();
+                            var roll_td = roll_tr.append("<td></td>").find("td");
+                            var roll_account_td = roll_td.after("<td></td>").next();
+                            var in_td = roll_account_td.after("<td><input type='checkbox' class='roll_stu_mode'></td>").next();
+                            roll_tr.attr({"roll_stu_id":i.class_bkp__pk})
+                            roll_td.attr({"roll_stu_id":i.class_bkp__pk})
+                            in_td.attr({"id":i.class_bkp__pk,"class":"roll_stu_mode","value":i.class_bkp__pk})
+                            roll_td.append(i.class_bkp__stu_detail__students__stu_name)
+                            roll_account_td.append(i.class_bkp__stu_detail__students__stu_account)
+    
+                        }
+                    }
+                }
+                else{
+                    alert(args.msg)
+                }
+            }
+        })
+    })
+
+    $('input[type=radio]').change(function() {
+        if (this.id == 'done') {
+            window.location.href="/eduadmin/class/filter/done/";
+        }else if (this.id == 'doing') {
+            window.location.href="/eduadmin/class/filter/doing/";
+        }else if(this.id == 'none'){
+          window.location.href="/eduadmin/class/filter/none/";
+        }
+        else{
+            window.location.href="/eduadmin/class/admin/";
+        }
+     })
+
+    $("#submit_roll").on('click', function(){
+        // 签到学生id
+        var checked = $("input[class='roll_stu_mode']:checked").parent()
+        var checked_list = []
+        for (i=0;i<checked.length;i++){
+            checked_list.push(checked[i].id)
+        }
+        //弹出二次确认的弹框
+        swal({
+        title: "确定签到？",
+        text: "签到后将不可更改！",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-danger",
+        confirmButtonText: "继续",
+        cancelButtonText: "取消",
+        closeOnConfirm: false,
+        closeOnCancel: false
+        },
+        function(isConfirm) {
+        if (isConfirm) {
+            // 向后端发送ajax请求删除数据
+           $.ajax({
+            url:"/eduadmin/class/roll/done/",
+            type:"POST",
+            data:{
+                "csrfmiddlewaretoken":"{{csrf_token}}",
+                "checked_list":JSON.stringify(checked_list),
+            },
+            success: function(args){
+                    // 判断响应状态码，做不同处理
+                    if(args.code === 1000){
+                    // 弹窗，删除成功
+                    swal("更新成功!", args.msg, "success");
+                    }
+                else if (args.code === 1001 ){
+                    swal("未选择学员!", "请选择需签到的学员", "info")
+                }
+                else{
+                    swal("失败!", "无法删除", "info")
+                }
+            }
+
+        })}
+        else {
+            swal("已取消", "保持原课时数不变", "error");
+        }
+        });
+    })
+    
+</script>
+{% endblock %}

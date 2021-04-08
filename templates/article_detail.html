@@ -1,0 +1,203 @@
+{% extends "site_base.html" %}
+
+{% block content %}
+<!-- 左侧文章区 start -->
+<div class="col-md-9 container-fluid " style="word-wrap: break-word;">
+            <div class="panel panel-default">
+            <div class="panel-heading">
+            <h1>{{article_obj.title}}</h1>
+            </div>
+            <div class="panel-body text-left" style="min-height:200px" >
+                {{article_obj.content|safe}}
+            </div>
+            
+            <div class="panel-footer">
+                <span class="action VoteButton--up">
+                    <button aria-label="赞同" type="button" class="Button VoteButton VoteButton--up" id='voteup'>
+                    <div class="glyphicon glyphicon-thumbs-up" style="display: inline-flex; align-items: center;"></div>
+                    &nbsp;赞同 &nbsp;<span id="voteup_num"> {{ article_obj.up_num}}</span></button>
+            </span>
+            <span class="action">
+            <button aria-label="反对" type="button" class="Button VoteButton VoteButton--down" id='votedown'>
+            <div class="glyphicon glyphicon-thumbs-down" style="display: inline-flex; align-items: center;"></div>
+            &nbsp;反对 &nbsp;<span id="votedown_num">{{ article_obj.down_num}}</span></button>
+            </span>
+            <div id='clicktips' style='color:red'></div>
+            </div>
+            
+            
+</div><!--col-md-8-->
+<!-- 评论楼 start-->
+<div>
+<p class="glyphicon glyphicon-th-large">评论区</p>
+<ul class="list-group" id="comment-group">
+    {% if comment_list %}
+        {% for comment in comment_list%}
+            <li class="list-group-item" style="height:35px">
+            <span style="font-weight:bold"> #{{ forloop.counter }}楼</span>
+            <span> {{ comment.comment_time|date:'Y-m-d H:i:s' }}&nbsp;&nbsp;</span>
+            <span class="glyphicon glyphicon-user"><a href="/Cshow/{{comment.user.username}}/" > {{ comment.user.username }}</a></span>
+            <span> <a class="pull-right reply" username="{{comment.user.username}}" comment_id="{{comment.pk}}">回复</a></span>
+            </li>
+            <li class="list-group-item">
+            <!-- 判断子评论 -->
+            {% if comment.parent_id %}
+                <p style="color:gray"><cite>引用：@ {{comment.parent.user.username}} </cite></p>
+                <p style="color:gray"><cite>&nbsp;{{comment.parent.content}}</cite>
+                </p>
+                <hr>
+            {% endif %}
+            {{ comment.content}}
+            </li>
+        {% endfor %}
+    {% else %}
+        <li class="list-group-item" style="height:100px">
+            <p> 您的文章暂无评论 </p>
+        </li>
+    {% endif %}
+
+</ul>
+</div>
+<!-- 评论楼 end-->
+
+
+<!-- 文章评论样式 start-->
+{% if request.user.is_authenticated %}
+<div>
+    <p><span class="glyphicon glyphicon-comment">发表评论</p>
+    <div>
+        <textarea name="comment" id="id_comment" cols="60" rows="10"></textarea>
+    </div>
+    <button class="btn btn-default" id='submit_comment'>提交评论</button>
+</div>
+{% else %}
+    <p> 请先注册或登录再进行评论</p>
+        <li><a href="{% url 'register'%}">注册</a></li>
+        <li><a href="{% url 'login'%}">登录</a></li>
+{% endif %}
+<!-- 文章评论样式 end-->
+</div> 
+<!-- 左侧文章区 end-->
+{% endblock %}
+
+{% block js %}
+
+<script>
+ // 设置全局的parentID字段
+ let parentId = null;
+ //给所有action类绑定
+  $('.action').click(function(){
+      let isUP = $(this).hasClass('VoteButton--up');
+      let $btn = $(this);
+      // 发送ajax请求
+      $.ajax({
+          url:"/Cshow/up_and_down/",
+          type:"POST",
+          data:{
+              "article_id":"{{article_obj.pk}}",
+              "is_up":isUP,
+              "csrfmiddlewaretoken":"{{csrf_token}}"
+          },
+          success:function(args){
+            
+            if (args.code == 1000){
+                $('#clicktips').text(args.msg)
+                // 将前端数字+1
+                // 1. 先获取之前的数字
+                if (isUP){
+                    var num = Number($('#voteup_num').text());
+                    $('#voteup_num').text(num+1)
+                }
+                else{
+                    var num = Number($('#votedown_num').text());
+                    $('#votedown_num').text(num+1)}
+            } 
+            else{
+                $('#clicktips').html(args.msg)
+                /*
+                if (isUP){
+                    var num = Number($('#voteup_num').text());
+                    $('#voteup_num').text(num+1)
+                }
+                else{
+                    var num = Number($('#votedown_num').text());
+                    $('#votedown_num').text(num+1)}
+                    */
+            }
+          }
+      
+  })
+  })
+// 根评论
+ $('#submit_comment').click(function(){
+     // 1. 获取评论内容
+    let conTent =  $('#id_comment').val();
+    // 2. 判断是不是子评论
+    if (parentId){
+        let indexNum = conTent.indexOf('\n')+1;
+        conTent = conTent.slice(indexNum);
+    }
+    $.ajax({
+        url:'/Cshow/comment/',
+        type: 'POST',
+        data:{
+            // 2. 给哪篇文章评论
+            'article_id':'{{article_obj.pk}}',
+            // 3. 评论内容
+            'content': conTent,
+            // 4. 评论人
+            'csrfmiddlewaretoken':'{{csrf_token}}',
+            'parent_id': parentId
+        },
+        success:function(args){
+            if (args.code == 1000){
+                // 1. 清除评论框内容
+                $('#id_comment').val('');
+                // 2. 临时渲染
+                let userName = '{{ request.user.username }}';
+                let temp = '<li class="list-group-item" style="height:10px, width:300px"> <span> ${userName} </span> <span> <a href="" class="pull right">回复</a></span> </li> <li class="list-group-item"> ${conTent} </li>';
+                alert(temp);
+                // 3.将生成的标签加入ul
+                $('#comment-group').append(temp);
+                // 4. 清除全局的parentid
+                parentId = null;
+            }
+        }
+    })
+ })
+
+
+ // 子评论
+ // 给回复按钮绑定点击事件
+ $('.reply').click(function(){
+     // 评论人
+    let commentUserName = $(this).attr('username');
+     // 评论主键值 (全局)
+    parentId = $(this).attr('comment_id');
+    $('#id_comment').val('@'+commentUserName+'\n').focus()
+ })
+</script>
+
+{% load static %}
+<script charset="utf-8" src="{% static 'kindeditor/kindeditor-all-min.js' %}"></script>
+    <script>
+            KindEditor.ready(function(K) {
+                    window.editor = K.create('#id_comment',
+                   { width : '70%', 
+                   height : '300px',
+                   resizeType : '1',
+                   uploadJson : '/upload_image/',
+                   extraFileUploadParams:{ 'csrfmiddlewaretoken':'{{csrf_token}}'},
+                   items:[
+        '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'code', 'cut', 'copy', 'paste',
+        'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright',
+        'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript',
+        'superscript', 'clearhtml', 'quickformat', 'selectall', '|', '/',
+        'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
+        'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'multiimage',
+        'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'baidumap', 'pagebreak',
+        'anchor', 'link', 'unlink', '|', 'about']
+        });
+                   })
+    </script>
+{% endblock %}

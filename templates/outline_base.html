@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" >
+    <title>CRO 学情站</title>
+    <meta name="viewport" content="width=device-width">
+    <meta keywords="创客 机器人 少儿 编程 教育 乐高 搭建 逻辑 ">
+    <meta description="CRO智能机器人创客空间是面向3-12岁儿童，基于乐高搭建，编程，家校互动平台，儿童测量系统的多维度乐高教育">
+    {% load static %}
+    <!--<link rel="stylesheet" href="{% static 'bootstrap-3.3.7-dist/jquery-ui-1.10.4.custom.min.css' %}">-->
+    <script src="{% static 'bootstrap-3.3.7-dist/jquery-1.10.2.js'%}"></script>
+    <!--<script src="{% static 'bootstrap-3.3.7-dist/jquery-ui-1.10.4.custom.min.js'%}"></script>-->
+    <script src="{% static 'sweetalert/sweetalert.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'sweetalert/sweetalert.css' %}">
+    <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js'%}"></script>
+    <script src="{% static 'highcharts/highcharts.js'%}"></script>
+    <style>
+      div.sweet-alert h2 {
+        padding-top: 10px;
+      }
+    </style>
+    {% block css %}
+    
+    {% endblock %}
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <!-- 上方静止导航条 -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{% url 'home'%}">CRO 学情站</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">校区风采 <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">活动赛事</a></li>
+        <li><a href="{% url 'chome'%}">C秀场</a></li>
+        <li><a href="#">儿童心理专区</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">校区用户<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+          <!-- 反向解析，根据字符串解析相应的url后缀-->
+            <li><a href="{% url 'home'%}">首页</a></li>
+            <li><a href="{% url 'eduadmin' '00'%} ">教务中心</a></li>
+            <li><a href="#">销售中心</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">续费预警</a></li>
+            <li><a href="#">试听记录</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">成长档案</a></li>
+            <li<a href='#'>数据中心</a></li>
+          </ul>
+        </li>
+      </ul>
+      <form class="navbar-form navbar-left">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        {% if request.user.is_authenticated %}
+          <li><a href="/Cshow/{{ request.user.username }}/">{{ request.user.username}}</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">更多操作 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">个人设置</a></li>
+            <li><a href="#">后台管理</a></li>
+            <li><a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">修改密码</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'logout'%}">退出登录</a></li>
+          </ul>
+            <!-- Large modal -->    
+              <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                  <div class="modal-header">
+                    <h3 class="modal-title text-center">修改密码</h1>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label for="">用户名</label>
+                        <input type="text" class="form-control" disabled value="{{request.user.username}}">
+                        </div>
+                      
+                      <div class="form-group">
+                        <label for="">原密码</label>
+                        <input type="text" class="form-control" id="id_old_password">
+                        </div>
+                      
+                      <div class="form-group">
+                        <label for="">新密码</label>
+                        <input type="text" class="form-control" id="id_new_password">
+                        </div>
+                      
+                      <div class="form-group">
+                        <label for="">确认密码</label>
+                        <input type="text" class="form-control" id="id_confirm_password">
+                        </div>
+                      </div><!--modal-body -->
+      
+                    <div class="modal-footer">
+                      <button type="button"  class="btn btn-primary" id="id_edit">修改</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                      <span style="color:red" id="id_errors"></span>
+                    </div><!--modal-footer-->
+                  </div>
+                </div>
+              </div>
+
+          {% else %}
+           <li><a href="#"> 未登录 </a></li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">更多操作 <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+            <li><a href="{% url 'register'%}">注册</a></li>
+            <li><a href="{% url 'login'%}">登录</a></li>
+            
+        </li>
+      </ul>
+      {% endif %}
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container-fluid">
+    <!-- 左侧固定侧边栏 -->
+    <div class="row">
+        <div class="col-md-3">
+
+
+            <div class="list-group accordion-heading" id="left-top">
+                <a href="{% url 'home'%}" class="list-group-item active" >
+                    校区首页
+                </a>
+                <!-- 反向解析，根据字符串解析相应的url后缀-->
+                <a class="list-group-item accordion-toggle" data-toggle="collapse" data-parent="#left-top" href="#collapseOne">教务中心</a>
+                <ul class="list-group collapse" id="collapseOne">
+                  <a href="{% url 'eduadmin' '00'%} " class="list-group-item list-group-item-action">  ··· 学员管理</a>
+                  <a href="{% url 'eduadmin_class'%}" class="list-group-item list-group-item-action">  ··· 班级管理</a>
+                  <a href="#" class="list-group-item list-group-item-action">  ··· 教师管理</a>
+                  
+                  <a href="#" class="list-group-item list-group-item-action">  ··· 日常课务</a>
+                </ul>
+                <a class="list-group-item accordion-toggle" data-toggle="collapse" data-parent="#left-top" href="#collapseTwo">销售中心</a>
+                  <ul class="list-group collapse" id="collapseTwo">
+                  <a href="../../sales/customer/list" class="list-group-item list-group-item-action">  ··· 客户档案</a>
+                  <a href="#" class="list-group-item list-group-item-action">  ··· 试听记录</a>
+                  <a href="../../sales/payment/list" class="list-group-item list-group-item-action">  ··· 课程/收费</a>
+                  <a href="{% url 'sales_warning' 'F'%}" class="list-group-item list-group-item-action">  ··· 续费预警</a>
+                 </ul>
+                <a class="list-group-item accordion-toggle" data-toggle="collapse" data-parent="#left-top" href="#collapseThree">教学中心</a>
+                  <ul class="list-group collapse" id="collapseThree">
+                  <a href="{% url 'calendar'%}" class="list-group-item list-group-item-action">  ··· 课表查看</a>
+                  <a href="{% url 'outline' 'a'%}" class="list-group-item list-group-item-action">  ··· 课程大纲</a>
+                  <a href="{% url 'save'%}" class="list-group-item list-group-item-action">  ··· 课件云盘</a>
+                  <a href="#" class="list-group-item list-group-item-action">  ··· 学生档案</a>
+                  <a href="#" class="list-group-item list-group-item-action">  ··· 我的数据</a>
+                 </ul>
+                <a href="#" class="list-group-item">数据中心</a>
+                <a href="#" class="list-group-item">财务中心</a>
+            </div>
+        </div>
+        <!-- 模板继承 -->
+        
+            <div class="col-md-8" style="min-height:200px">
+        <ul class="nav nav-tabs">
+            <li role="presentation" class="active" ><a href="#category" aria-controls="home" role="tab" data-toggle="tab" class="li" id='1'>大颗粒</a></li>
+            <li role="presentation"><a href="#category" aria-controls="category" role="tab" data-toggle="tab" class="li" id='2'>9686小颗粒</a></li>
+            <li role="presentation"><a href="#category" aria-controls="category" role="tab" data-toggle="tab" class="li" id='3'>衔接课</a></li>
+            <li role="presentation"><a href="#category" aria-controls="category" role="tab" data-toggle="tab" class="li" id='4'>EV3</a></li>
+            <li role="presentation"><a href="#category" aria-controls="category" role="tab" data-toggle="tab" class="li" id='5'>python</a></li>
+            <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab" >上传 <span class="badge">3</span></a></li>
+        </ul>
+
+        <div class="tab-content">  
+          <div role="tabpanel" class="tab-pane active" id="category">
+          <br>
+          {% block content %}
+            <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>编号</th>
+                <th>上课主题</th>
+                <th>描述</th>
+                <th>备注</th>
+                <th>上传人</th>
+                <th>文件</th>
+                <th>选项</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in data %}
+                <tr>
+                    <td>{{ row.cid }}</td>
+                    <td>{{ row.theme }}</td>
+                    <td>{{ row.description }}</td>
+                    <td>{{ row.notes }}</td>
+                    <td id='{{row.uploader.tch_account}}'>{{ row.uploader.tch_name }}</td>
+                    <td><a href='/tch/outline/2/{{row.pk}}/' id='{{row.pk}}'>{{ row.files }}</a></td>
+                    <td>
+                        <a href="#" class="btn btn-default btn-sm">编辑</a>
+                        <a class="btn btn-danger btn-sm del" delete_id="{{row.pk}}">删除</a>
+                    </td>
+
+                </tr>
+                <nav aria-label="Page navigation"></nav>
+            {% endfor %}
+              </tbody>
+          </table>
+          <div class="col-md-8 col-md-offset-3">
+          {{page_obj.page_html|safe}}
+        </div>
+          {% endblock %}
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="settings">
+          <br>请在此处上传课程大纲
+          <br>
+          <form class="form-horizontal clearfix" method="post" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group col-sm-8 clearfix">
+                    <label class="col-sm-4 control-label">{{ field.label }}</label>
+                    <div class="col-sm-8">
+                        {{ field }} <span style="color:firebrick;">{{ field.errors.0 }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="form-group col-sm-12">
+                <div class="col-sm-6">
+                    <div class="col-sm-offset-3">
+                        <button type="submit" class="btn btn-primary">提 交</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+          </div>
+        </div>
+
+        
+
+        
+      </div><!--col-md-8-->
+            </div>
+        
+    </div>
+</div>
+
+{% block js %}
+<script>
+  $("#id_edit").click(function(){
+      $.ajax({
+        url:"/set_password/",
+        type:"post",
+        data:{
+          "old_password":$("#id_old_password").val(),
+          "new_password":$("#id_new_password").val(),
+          "confirm_password":$("#id_confirm_password").val(),
+          "csrfmiddlewaretoken":"{{ csrf_token }}"
+        },
+        success:function(args){
+          if(args.code == 1000){
+            window.location.reload();
+          }
+          else{
+            $("#id_errors").text(args.msg);
+          }
+        }
+      })
+
+  })
+
+  $(".li").click(function(){
+    window.location.href="/tch/outline/"+this.id+"/"
+  })
+</script>
+{% endblock %}
+
+</body>
+</html>
+

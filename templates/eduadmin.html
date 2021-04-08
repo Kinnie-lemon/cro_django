@@ -1,0 +1,177 @@
+<!-- 继承模板 -->
+{% extends 'home.html' %}
+
+
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+    <h3 class="panel-title">学员管理</h3>
+    </div>
+</div>
+<div class="row">
+   <div class="col-lg-6">
+        <div class="input-group">
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">学生姓名 <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                <li><a href="#">ID</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+                </ul>
+            </div><!-- /btn-group -->
+            <input type="text" class="form-control" aria-label="请输入查找内容">
+            
+            <span class="input-group-btn">
+            <button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false">查找</button>
+            </span>
+            <span class="input-group-addon">
+                <input type="checkbox" aria-label="...">已结课
+            </span>
+            <span class="input-group-addon">
+                    <input type="checkbox" aria-label="...">未结课
+            </span>
+            
+            <span class="input-group-addon">
+                    <input type="checkbox" aria-label="...">未排课
+            </span>
+            
+        </div><!-- /input-group -->
+
+  </div><!-- /.col-lg-6 -->
+  <div class="btn-group-btn">
+            <a href="{% url 'stu_add' %}" class="btn btn-info ">添加</a>
+            <a href="" class="btn btn-warning">发送消息</a>
+            <a href="" class="btn btn-success">导出Excel</a>
+             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    更多操作 <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="#" >导入名单</a></li>
+    <li><a href="#">导出名单</a></li>
+  </ul>
+        </div><!-- /btn-group -->
+</div><!-- /.row -->
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th> 账号 </th>
+                <th> 学员姓名</th>
+                <th> 联系电话</th>
+                <th> 所在班级</th>
+                <th> 授课教师</th>
+                <th> 总购课</th>
+                <th> 总赠课</th>
+                <th> 总金额</th>
+                <th> 已消耗课时</th>
+                <th> 缴费次数</th>
+                <th> 剩余课时</th>
+                <th> 操作 </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stu in stu_list %}
+                <tr>
+                <td>{{stu.stu_account}} </td>
+                <td>{{stu.stu_name}} </td>
+                <td>{{stu.stu_detail.tel}}</td>
+
+                     <td>
+                     {% for c in stu.stu_detail.class_bkp_set.all %}
+                        {% if forloop.last %}
+                        {{ c.classes_name.first.class_name}}
+                        {% else %}
+                        <!--{{c.classes_name.first.class_name}},-->
+                        {% endif %}
+                    {% endfor %}</td>
+                    <td>
+                     {% for c in stu.stu_detail.class_bkp_set.all %}
+                        {% if forloop.last %}
+                        {{ c.tches_name.first.tch_name}}
+                        {% else %}
+                        <!--{{c.classes_name.first.class_name}},-->
+                        {% endif %}
+                    {% endfor %}</td>
+                    <td>
+                    {{stu.sumClass}}
+                    </td>
+                    <td>
+                    {{stu.sumGiven}}
+                    </td>
+                    <td>
+                    {{stu.pay}}
+                    </td>
+                    <td>
+                    {{stu.stu_detail.class_count}}
+                    </td>
+                    <td>
+                    {{stu.pays}}
+                    </td>
+                    <td>
+                    {{stu.stu_detail.class_remain}}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'stu_edit' stu.pk %}" class="btn btn-default btn-sm">编辑</a>
+                        <a class="btn btn-danger btn-sm del" delete_id="{{stu.pk}}">删除</a>
+                    </td>
+                </tr>
+                <nav aria-label="Page navigation"></nav>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="col-md-8 col-md-offset-3">
+    {{page_obj.page_html|safe}}
+    </div>
+{% endblock %}
+
+{% block js %}
+<script>
+    $('.del').on('click', function(){
+        //this可以直接获取当前操作的对象
+        let currentBtn = $(this);
+        //弹出二次确认的弹框
+        swal({
+        title: "确定删除？",
+        text: "删除后将不可恢复数据！",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-danger",
+        confirmButtonText: "继续",
+        cancelButtonText: "取消",
+        closeOnConfirm: false,
+        closeOnCancel: false
+        },
+        function(isConfirm) {
+        if (isConfirm) {
+            // 向后端发送ajax请求删除数据
+            $.ajax({
+                url:'del/',
+                type: 'POST',
+                data:{'delete_id':currentBtn.attr('delete_id')},
+                success: function(args){
+                    // 判断响应状态码，做不同处理
+                    if(args.code === 1000){
+                    // 弹窗，删除成功
+                    swal("删除成功!", args.msg, "success");
+                    // 局部刷新
+                    // 利用DOM 动态刷新
+                    currentBtn.parent().parent().remove();
+
+                    }
+                
+                else{
+                    swal("失败!", "无法删除", "info")
+                }}
+            })
+        }
+        else {
+            swal("已取消", "信息已安全保留 :)", "error");
+        }
+        });
+    })
+
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" >
+    <title>CRO 学情站</title>
+    <meta name="viewport" content="width=device-width">
+    <meta keywords="创客 机器人 少儿 编程 教育 乐高 搭建 逻辑 ">
+    <meta description="CRO智能机器人创客空间是面向3-12岁儿童，基于乐高搭建，编程，家校互动平台，儿童测量系统的多维度乐高教育">
+    {% load static %}
+    <script src="{% static 'bootstrap-3.3.7-dist/jquery-3.5.1.min.js'%}"></script>
+    <script src="{% static 'sweetalert/sweetalert.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'sweetalert/sweetalert.css' %}">
+    <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js'%}"></script>
+    <style>
+      div.sweet-alert h2 {
+        padding-top: 10px;
+      }
+    </style>
+    {% block css %}
+    
+    {% endblock %}
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <!-- 上方静止导航条 -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/home/">CRO 学情站</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="#">校区风采 <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">活动赛事</a></li>
+        <li><a href="{% url 'chome'%}">C秀场</a></li>
+        <li class="active"><a href="{% url 'psycho_home' 'login'%}">儿童心理专区</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">校区用户<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+          <!-- 反向解析，根据字符串解析相应的url后缀-->
+            <li><a href="{% url 'home'%}">首页</a></li>
+            <li><a href="#">教务中心</a></li>
+            <li><a href="#">销售中心</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">续费预警</a></li>
+            <li><a href="#">试听记录</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">成长档案</a></li>
+            <li<a href='#'>数据中心</a></li>
+          </ul>
+        </li>
+      </ul>
+      <form class="navbar-form navbar-left">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        {% if request.user.is_authenticated %}
+          <li><a href="/Cshow/{{ request.user.username }}/">{{ request.user.username }}</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">更多操作 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/backend/{{request.user.username}}/">个人设置</a></li>
+            <li><a href="#">后台管理</a></li>
+            <li><a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">修改密码</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'logout'%}">退出登录</a></li>
+          </ul>
+            <!-- Large modal -->    
+              <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                  <div class="modal-header">
+                    <h3 class="modal-title text-center">修改密码</h1>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label for="">用户名</label>
+                        <input type="text" class="form-control" disabled value="{{request.user.username}}">
+                        </div>
+                      
+                      <div class="form-group">
+                        <label for="">原密码</label>
+                        <input type="text" class="form-control" id="id_old_password">
+                        </div>
+                      
+                      <div class="form-group">
+                        <label for="">新密码</label>
+                        <input type="text" class="form-control" id="id_new_password">
+                        </div>
+                      
+                      <div class="form-group">
+                        <label for="">确认密码</label>
+                        <input type="text" class="form-control" id="id_confirm_password">
+                        </div>
+                      </div><!--modal-body -->
+      
+                    <div class="modal-footer">
+                      <button type="button"  class="btn btn-primary" id="id_edit">修改</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                      <span style="color:red" id="id_errors"></span>
+                    </div><!--modal-footer-->
+                  </div>
+                </div>
+              </div>
+
+          {% else %}
+           <li><a href="#"> 未登录 </a></li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">更多操作 <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+            <li><a href="{% url 'register'%}">注册</a></li>
+            <li><a href="{% url 'login'%}">登录</a></li>
+            
+        </li>
+      </ul>
+      {% endif %}
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container-fluid">
+    <!-- 左侧固定侧边栏 -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+            <div class="panel-heading"><a href="/Cshow/{{ request.user.username }}">我的主页</a></div>
+            <div class="panel-body">
+                {{ request.user.username }}
+            </div>
+            </div>
+
+            <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">我的测试</h3>
+            </div>
+            <div class="panel-body">
+                Panel content
+            </div>
+            </div>
+
+        </div><!--col-md-3-->
+
+
+
+      <div class="col-md-8" style="min-height:200px">
+      <div class="jumbotron">
+        <h1>您好</h1>
+        <h3>欢迎您进入CRO儿童心理专区</h3>
+        <p>如果您未登录，请点击登录跳转至登录界面，否则您将无法进入测试</p>
+        <p><a class="btn btn-primary btn-lg" href="{% url 'psycho_site' request.user.username %}" role="button">个人站点</a></p>
+    </div>
+    <div class="row">
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+      <div class="caption">
+        <h3>SCL-90</h3>
+        <p>测试内容：心理健康测试</p>
+        <p>适用对象：16岁以上</p>
+        <p>
+            <a href="{% url 'psycho_test' 'SCL'%}" class="btn btn-default" role="button">进入测试</a>
+        </p>
+      </div>
+    </div>
+  </div>
+    <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+      <div class="caption">
+        <h3>Conners</h3>
+        <p>测试内容：儿童行为测试</p>
+        <p>适用对象：3-16岁</p>
+        <p>
+            <a href="{% url 'psycho_test' 'conners'%}" class="btn btn-default" role="button">进入测试</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+      <ul class="media-list">
+      {% for article_obj in article_queryset %}
+        <li class="media">
+          <div class="media-left">
+            <a href="#">
+            <!--用户头像显示-->
+            <!--1. 网址使用的静态文件默认放在static文件夹下-->
+            <!--2. 用户上传的数据也应放在某个文件夹下
+              media 配置：让用户上传的所有文件都固定放在某个文件夹-->
+              <img class="media-object" src="/media/{{article_obj.blog.userinfo.avatar}}" alt="..." width="88">
+            </a>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading"><a href="/Cshow/{{article_obj.blog.userinfo.username}}/article/{{article_obj.pk}}/">{{ article_obj.title}}</a></h4>
+            {{ article_obj.desc}}
+          </div>
+          <div>
+          <br>
+          <span><a href="/Cshow/{{ article_obj.blog.userinfo.username}}/">{{ article_obj.blog.userinfo.username}}</a>
+          <span>发布于</span>
+          <span>{{ article_obj.create_time|date:'Y-m-d'}}&nbsp;</span>
+          <span><span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;点赞（{{ article_obj.up_num}}）</span>
+          <span><span class="glyphicon glyphicon-comment"></span>&nbsp;评论（{{ article_obj.comment_num}}）</span>
+
+          </div>
+        </li>
+        <hr>
+        {% endfor %}
+      </ul>
+      </div><!--col-md-8-->
+    </div><!--row-->
+</div><!--container-->
+

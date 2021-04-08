@@ -1,0 +1,50 @@
+<!-- 继承模板 -->
+{% extends 'home.html' %}
+
+
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+    <h3 class="panel-title">添加学员</h3>
+    </div>
+</div>
+<form action="#" method="post">
+<p>学员姓名
+    <input type="text" name="stu_name" class="form-control" >
+</p>
+<p>账号
+    <input type="text" name="stu_account" class="form-control" >
+</p>
+<p>密码
+    <input type="text" name="password" class="form-control" >
+</p>
+<p>联系方式
+    <input type="text" name="tel" class="form-control" >
+</p>
+<p>就读学校
+    <input type="text" name="school" class="form-control" >
+</p>
+<p>生日
+    <input type="date" name="birthday" class="form-control" >
+</p>
+<p>地址
+    <input type="text" name="addr" class="form-control" >
+</p>
+<p>班级
+    <select name="stu_class" id="" class="form-control">
+        {% for obj in class_list %}
+            <option value="{{obj.pk}}" multiple>{{obj.class_name}}</option>
+        {% endfor %}
+    </select>
+</p>
+<p>带班老师
+    <select name="stu_teacher" id="" class="form-control">
+        {% for obj in teacher_list %}
+            <option value="{{obj.pk}}" multiple>{{obj.tch_name}}</option>
+        {% endfor %}
+    </select>
+</p>
+<input type="submit" value="新增" class="btn btn-primary btn-block">
+</form>
+{% endblock %}

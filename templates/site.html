@@ -1,0 +1,36 @@
+{% extends "site_base.html" %}
+
+{% block content %}
+<div class="col-md-8 container" style="min-height: 500px">
+        <ul class="media-list">
+            {% for article_obj in article_list %}
+            <li class="media">
+                <div class="media-left">
+                <a href="#">
+                <!--用户头像显示-->
+                <!--1. 网址使用的静态文件默认放在static文件夹下-->
+                <!--2. 用户上传的数据也应放在某个文件夹下
+                    media 配置：让用户上传的所有文件都固定放在某个文件夹-->
+                    <img class="media-object" src="/media/{{article_obj.blog.userinfo.avatar}}" alt="..." width="88">
+                </a>
+                </div>
+                <div class="media-body">
+                <h4 class="media-heading"><a href="/Cshow/{{username}}/article/{{article_obj.pk}}/">{{ article_obj.title}}</a></h4>
+                {{ article_obj.desc}}
+                </div>
+                <div class="pull-right">
+                    <br>
+                    <span> posted &nbsp;</span>
+                    
+                    <span>@ &nbsp;</span>
+                    <span>{{ article_obj.create_time|date:'Y-m-d'}}&nbsp;</span>
+                    <span><span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;点赞（{{ article_obj.up_num}}）</span>
+                    <span><span class="glyphicon glyphicon-comment"></span>&nbsp;评论（{{ article_obj.comment_num}}）</span>
+                    <span><a href="#"> 编辑</a></span>
+                </div>
+            </li>
+            <hr>
+            {% endfor %}
+        </ul>
+    </div><!--col-md-8-->
+{% endblock %}

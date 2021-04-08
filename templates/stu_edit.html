@@ -1,0 +1,60 @@
+<!-- 继承模板 -->
+{% extends 'home.html' %}
+
+
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+    <h3 class="panel-title">编辑学员</h3>
+    </div>
+</div>
+<form action="#" method="post">
+{% csrf_token %}
+<!--添加默认值--> 
+<p>学员姓名
+    <input type="text" name="stu_name" class="form-control" value="{{edit_obj.stu_name}}">
+</p>
+<p>账号
+    <input type="text" name="stu_account" class="form-control" value="{{edit_obj.stu_account}}">
+</p>
+<p>密码
+    <input type="text" name="password" class="form-control" value="{{edit_obj.stu_password}}">
+</p>
+<p>联系方式
+    <input type="text" name="tel" class="form-control" value="{{edit_obj.stu_detail.tel}}">
+</p>
+<p>就读学校
+    <input type="text" name="school" class="form-control" value="{{edit_obj.stu_detail.school}}">
+</p>
+<p>生日
+    <input type="date" name="birthday" class="form-control" value="{{edit_obj.stu_detail.birthday|date:'Y-m-d'}}">
+</p>
+<p>地址
+    <input type="text" name="addr" class="form-control" value="{{edit_obj.stu_detail.addr}}">
+</p>
+<p>班级
+    <select name="stu_class" id="" class="form-control">
+        {% for obj in class_list %}
+            {% if obj in edit_obj.stu_detail.classes.all %}
+                <option value="{{obj.pk}}" multiple selected>{{obj.class_name}}</option>
+            {% else %}
+                <option value="{{obj.pk}}" multiple>{{obj.class_name}}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</p>
+<p>带班老师
+    <select name="stu_teacher" id="" class="form-control">
+        {% for obj in teacher_list %}
+            {% if obj in edit_obj.stu_detail.teachers.all %}
+                <option value="{{obj.pk}}" multiple selected>{{obj.tch_name}}</option>
+            {% else %}
+                <option value="{{obj.pk}}" multiple>{{obj.tch_name}}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</p>
+<input type="submit" value="确定修改" class="btn btn-warning btn-block">
+</form>
+{% endblock %}

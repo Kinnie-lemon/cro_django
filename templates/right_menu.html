@@ -1,0 +1,36 @@
+<div class="container-fixed ">
+    <!-- 右侧固定侧边栏 -->
+        <div class="col-md-3 pull-right">
+            <div class="panel panel-default">
+            <div class="panel-heading">文章分类</div>
+            <div class="panel-body">
+                {% for category in category_list %}
+                    <p><a href="/Cshow/{{username}}/category/{{category.pk}}"">{{category.name}}&nbsp;（{{category.count_num}}）</a></p>
+                {% endfor %}
+            </div>
+            </div>
+        </div><!-- col-md-3 -->
+
+        <div class="col-md-3 pull-right">
+            <div class="panel panel-default">
+            <div class="panel-heading">文章标签</div>
+            <div class="panel-body">
+                {% for tag in tag_list %}
+                <!--侧边栏筛选-->
+                    <p><a href="/Cshow/{{username}}/tag/{{tag.pk}}"">{{tag.name}}&nbsp;（{{tag.count_num}}）</a></p>
+                {% endfor %}
+            </div>
+            </div>
+        </div><!-- col-md-3 -->
+
+        <div class="col-md-3 pull-right">
+            <div class="panel panel-default">
+            <div class="panel-heading">日期归档</div>
+            <div class="panel-body">
+                {% for date in date_list %}
+                    <p><a href="/Cshow/{{username}}/archive/{{date.month|date:'Y-m'}}">{{date.month|date:'Y年m月'}}&nbsp;（{{date.count_num}}）</a></p>
+                {% endfor %}
+            </div>
+            </div>
+        </div><!-- col-md-3 -->
+    </div>

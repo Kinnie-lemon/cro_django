@@ -1,0 +1,101 @@
+{% extends 'home.html' %}
+
+{% block content %}
+  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">CRO 学情站 用户注册</h3>
+                    </div>
+                
+                    <div class="panel-body">
+                        <div class="jumbotron">
+                            <h1>欢迎注册 CRO 学情站!</h1>
+                            <p>内部员工可在此记录工作实况；校区客户可登录查看进步曲线，上课记录等详细内容</p>
+                            
+
+</div>
+<form id='regi_form'>
+{% csrf_token %}
+{% for form in form_obj %}
+<div class="form-group">
+    <label for="">{{ form.label }}</label>
+    {{form }}
+    <span style="color:red" class="pull-right">{{form.errors.0}}</span>
+</div>
+{% endfor %}
+<div class="form-group">
+    <label for="regi_avatar">头像
+        {% load static %}
+        <img src="{% static 'img/CROimg.png' %}" alt="" width="80" id="regi_img" style="margin-left:10px" >
+    </label>
+    <input type="file" name="avatar" id="regi_avatar">
+</div>
+
+<input type="button" value="注册" class="btn btn-primary btn-block" id='regi_submit'>
+</form>
+</div><!--jumbotron-->
+</div><!--panel body -->
+</div><!-- panel end -->
+{% endblock %}
+
+{% block js %}
+<script>
+    // 事件绑定：文本域变化触发
+    $('#regi_avatar').change(function(){
+        //  文件阅读器对象
+        // 1. 先生成一个文件阅读器对象
+        let myFileReaderObj = new FileReader();
+        // 2. 获取用户上传的头像文件
+        let fileObj = $(this)[0].files[0];
+        // 3.将文件对象交给阅读器对象读取
+        myFileReaderObj.readAsDataURL(fileObj); //异步操作，还没读取完毕就会向后执行
+        // 4.等待文件阅读器加载完毕后再执行
+        myFileReaderObj.onload = function(){
+        // 5.利用文件阅读器展示到前端页面 修改src属性
+         $('#regi_img').attr('src',myFileReaderObj.result);
+        }
+    })
+
+    // 发送ajax请求
+    $('#regi_submit').click(function(){
+        let formDataObj = new FormData();
+        // 1.添加普通键值对
+        // 循环从元组中取值
+        $.each($('#regi_form').serializeArray(),function(index,obj){
+            formDataObj.append(obj.name,obj.value)
+        });
+        
+        // 2.添加文件数据
+        // 绑定的是获取数据的input框，不是显示的img框
+        formDataObj.append('avatar', $('#regi_avatar')[0].files[0]);
+        // 3.发送ajax请求
+        $.ajax({
+            url:'',
+            type:'post',
+            data: formDataObj,
+            contentType:false,
+            processData:false,
+            success:function(args){
+                if (args.code==1000){
+                    // 跳转到登录页面
+                    window.location.href = args.url
+                }
+                else{
+                    //根据id将报错渲染过去
+                    $.each(args.msg,function(index,obj){
+                        let targetId = '#id_'+index;
+                        $(targetId).next().text(obj[0]).parent().addClass('has-error')
+                    })
+                }
+            }
+
+        })
+        
+    })
+
+    $('input').focus(function(){
+        // 点击后取消红色报错
+        // 给所有input框绑定获取焦点事件
+        $(this).next().text('').parent().removeClass('has-error')
+    })
+</script>
+{% endblock %}
